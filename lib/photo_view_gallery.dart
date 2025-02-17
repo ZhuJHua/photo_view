@@ -10,7 +10,6 @@ import 'package:photo_view/photo_view.dart'
         PhotoViewImageTapUpCallback,
         PhotoViewImageScaleEndCallback,
         ScaleStateCycle;
-
 import 'package:photo_view/src/controller/photo_view_controller.dart';
 import 'package:photo_view/src/controller/photo_view_scalestate_controller.dart';
 import 'package:photo_view/src/core/photo_view_gesture_detector.dart';
@@ -23,6 +22,9 @@ typedef PhotoViewGalleryPageChangedCallback = void Function(int index);
 /// A type definition for a [Function] that defines a page in [PhotoViewGallery.build]
 typedef PhotoViewGalleryBuilder = PhotoViewGalleryPageOptions Function(
     BuildContext context, int index);
+
+typedef PhotoViewGalleryItemWrapper = Widget Function(
+    BuildContext context, int index, Widget child);
 
 /// A [StatefulWidget] that shows multiple [PhotoView] widgets in a [PageView]
 ///
@@ -118,6 +120,7 @@ class PhotoViewGallery extends StatefulWidget {
     this.customSize,
     this.allowImplicitScrolling = false,
     this.pageSnapping = true,
+    this.itemWrapper = defaultItemWrapper,
   })  : itemCount = null,
         builder = null,
         super(key: key);
@@ -143,6 +146,7 @@ class PhotoViewGallery extends StatefulWidget {
     this.customSize,
     this.allowImplicitScrolling = false,
     this.pageSnapping = true,
+    this.itemWrapper = defaultItemWrapper,
   })  : pageOptions = null,
         assert(itemCount != null),
         assert(builder != null),
@@ -199,6 +203,13 @@ class PhotoViewGallery extends StatefulWidget {
   final bool pageSnapping;
 
   bool get _isBuilder => builder != null;
+
+  final PhotoViewGalleryItemWrapper itemWrapper;
+
+  static Widget defaultItemWrapper(
+      BuildContext context, int index, Widget child) {
+    return child;
+  }
 
   @override
   State<StatefulWidget> createState() {
@@ -305,8 +316,12 @@ class _PhotoViewGalleryState extends State<PhotoViewGallery> {
             errorBuilder: pageOption.errorBuilder,
           );
 
-    return ClipRect(
-      child: photoView,
+    return widget.itemWrapper(
+      context,
+      index,
+      ClipRect(
+        child: photoView,
+      ),
     );
   }
 
